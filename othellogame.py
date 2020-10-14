@@ -13,6 +13,7 @@ function, as each player might have their own separate way of calculating utilit
 '''
 import copy
 import random
+import math
 
 WHITE = 1
 BLACK = -1
@@ -85,11 +86,152 @@ class RandomPlayer:
     def make_move(self, state):
         '''Given the state, returns a legal action for the agent to take in the state
         '''
+        display(state)
+        if self.color == 1:
+                print("White ", end='')
+        else:
+            print("Black ", end='')
+        print(" to play.")
         curr_move = None
         legals = actions(state)
         curr_move=random.choice(legals)
         return curr_move
 
+class MinimaxPlayer:
+    def __init__(self, mycolor, depth):
+        self.color = mycolor
+        self.depth=depth
+
+    def get_color(self):
+        return self.color
+    
+    def get_depth(self):
+        return self.depth
+    
+    def max_value(self, state, curr_color, depth):
+        if terminal_test(state) or depth==0:
+            return utility(state, curr_color)
+        legals=actions(state)
+        #action_holder=""
+        max_val=(-math.inf)
+        for action in legals:
+            state_holder=result(state, action)
+            val=self.min_value(state_holder, curr_color, depth-1)
+            if val>=max_val:
+                max_val=val
+                #action_holder=action
+        return max_val
+
+    def min_value(self,state, curr_color, depth):
+        if terminal_test(state) or depth==0:
+            return utility(state, curr_color)
+        legals=actions(state)
+        min_val=(math.inf)
+        #action_holder=""
+        for action in legals:
+            state_holder=result(state, action)
+            val=self.max_value(state_holder, curr_color, depth-1)
+            if val<=min_val:
+                min_val=val
+                #action_holder=action
+        return min_val
+
+    def make_move(self, state):
+        '''Given the state, returns a legal action for the agent to take in the state
+        '''
+        display(state)
+        if self.color == 1:
+                print("White ", end='')
+        else:
+            print("Black ", end='')
+        print(" to play.")
+        depth=self.get_depth()
+        legals = actions(state)
+        curr_color=self.get_color()
+        action_holder=""
+        max_val=(-math.inf)
+        for action in legals:
+            state_holder=result(state, action)
+            #print("state holder: "+str(state_holder))
+            #print("curr color: "+str(curr_color))
+            #print("depth: "+str(depth))
+            val=self.min_value(state_holder, curr_color, depth)
+            if val>=max_val:
+                max_val=val
+                action_holder=action
+        return action_holder
+
+class AlphaBetaPlayer:
+    def __init__(self, mycolor, depth):
+        self.color = mycolor
+        self.depth=depth
+
+    def get_color(self):
+        return self.color
+    
+    def get_depth(self):
+        return self.depth
+    
+    def max_value(self, state, curr_color, depth, alpha, beta):
+        if terminal_test(state) or depth==0:
+            return utility(state, curr_color)
+        legals=actions(state)
+        #action_holder=""
+        max_val=(-math.inf)
+        for action in legals:
+            state_holder=result(state, action)
+            val=self.min_value(state_holder, curr_color, depth-1, alpha, beta)
+            if val>=max_val:
+                max_val=val
+                #action_holder=action
+            if val>=beta:
+                return val
+            alpha=max(alpha, val)
+        return max_val
+
+    def min_value(self,state, curr_color, depth, alpha, beta):
+        if terminal_test(state) or depth==0:
+            return utility(state, curr_color)
+        legals=actions(state)
+        min_val=(math.inf)
+        #action_holder=""
+        for action in legals:
+            state_holder=result(state, action)
+            val=self.max_value(state_holder, curr_color, depth-1,alpha, beta)
+            if val<=min_val:
+                min_val=val
+                #action_holder=action
+            if val<=alpha:
+                return val
+            beta=min(beta, val)
+        return min_val
+
+    def make_move(self, state):
+        '''Given the state, returns a legal action for the agent to take in the state
+        '''
+        display(state)
+        if self.color == 1:
+                print("White ", end='')
+        else:
+            print("Black ", end='')
+        print(" to play.")
+        depth=self.get_depth()
+        legals = actions(state)
+        curr_color=self.get_color()
+        action_holder=""
+        max_val=(-math.inf)
+        alpha=(-math.inf)
+        beta=(math.inf)
+        for action in legals:
+            state_holder=result(state, action)
+            #print("state holder: "+str(state_holder))
+            #print("curr color: "+str(curr_color))
+            #print("depth: "+str(depth))
+            val=self.min_value(state_holder, curr_color, depth, alpha, beta)
+            if val>=max_val:
+                max_val=val
+                action_holder=action
+        return action_holder
 
 class OthelloState:
     '''A class to represent an othello game state'''
@@ -107,6 +249,40 @@ class OthelloState:
         self.current = currentplayer
         self.other = otherplayer
 
+def utility(state, agent_color):
+    wcount = 0
+    bcount = 0
+    for i in range(SIZE):
+        for j in range(SIZE):
+            if state.board_array[i][j] == WHITE:
+                wcount += 1
+            elif state.board_array[i][j] == BLACK:
+                bcount += 1
+    if terminal_test(state):
+        if agent_color==WHITE and wcount>bcount:
+            util= 10*(wcount-bcount)
+        elif agent_color==WHITE and wcount<bcount:
+            util= -10*(bcount-wcount)
+        elif agent_color==WHITE and wcount==bcount:
+            util= 0
+        elif agent_color==BLACK:
+            if bcount>wcount:
+                util= 10*(bcount-wcount)
+            elif bcount<wcount:
+                util= -10*(wcount-bcount)
+            else:
+                util= 0
+    else:
+        if agent_color==WHITE:
+            util= wcount-bcount
+        else:
+            util= bcount-wcount
+           
+        
+    #print("Black: " + str(bcount))
+    #print("White: " + str(wcount))
+    #print("utility: "+str(util))
+    return util
 
 def player(state):
     return state.current
@@ -241,8 +417,19 @@ def play_game(p1 = None, p2 = None):
     '''
     if p1 == None:
         p1 = HumanPlayer(BLACK)
+        print("H1")
     if p2 == None:
         p2 = HumanPlayer(WHITE)
+        print("H2")
+    if p1==BLACK:
+        print("random")
+        p1=RandomPlayer(BLACK)
+        p2=RandomPlayer(WHITE)
+    if p1==WHITE:
+        print("Minimax")
+        #p1=MinimaxPlayer(WHITE, 4)
+        p1=AlphaBetaPlayer(WHITE, 4)
+        p2=RandomPlayer(BLACK)
 
     s = OthelloState(p1, p2)
     while True:
@@ -270,7 +457,7 @@ def play_game(p1 = None, p2 = None):
             return
 
 def main():
-    play_game()
+    play_game(WHITE,None)
 
 if __name__ == '__main__':
     main()
