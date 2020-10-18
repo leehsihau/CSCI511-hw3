@@ -180,13 +180,10 @@ class AlphaBetaPlayer:
         max_val=(-math.inf)
         for action in legals:
             state_holder=result(state, action)
-            val=self.min_value(state_holder, curr_color, depth-1, alpha, beta)
-            if val>=max_val:
-                max_val=val
-                #action_holder=action
-            if val>=beta:
-                return val
-            alpha=max(alpha, val)
+            max_val= max(max_val, self.min_value(state_holder, curr_color, depth-1, alpha, beta))
+            if max_val>=beta:
+                return max_val
+            alpha=max(alpha, max_val)
         return max_val
 
     def min_value(self,state, curr_color, depth, alpha, beta):
@@ -197,13 +194,10 @@ class AlphaBetaPlayer:
         #action_holder=""
         for action in legals:
             state_holder=result(state, action)
-            val=self.max_value(state_holder, curr_color, depth-1,alpha, beta)
-            if val<=min_val:
-                min_val=val
-                #action_holder=action
-            if val<=alpha:
-                return val
-            beta=min(beta, val)
+            min_val =min(min_val,self.max_value(state_holder, curr_color, depth-1,alpha, beta))
+            if min_val<=alpha:
+                return min_val
+            beta=min(beta, min_val)
         return min_val
 
     def make_move(self, state):
@@ -211,7 +205,7 @@ class AlphaBetaPlayer:
         '''
         display(state)
         if self.color == 1:
-                print("White ", end='')
+            print("White ", end='')
         else:
             print("Black ", end='')
         print(" to play.")
