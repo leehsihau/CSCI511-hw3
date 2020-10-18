@@ -428,9 +428,9 @@ def play_game(p1 = None, p2 = None):
     if p1==WHITE:
         print("Minimax")
         #p1=MinimaxPlayer(WHITE, 4)
-        p1=AlphaBetaPlayer(WHITE, 4)
-        p2=RandomPlayer(BLACK)
-
+        p2=AlphaBetaPlayer(WHITE, 4)
+        p1=RandomPlayer(BLACK)
+        #p2=AlphaBetaPlayer(BLACK, 6)
     s = OthelloState(p1, p2)
     while True:
         action = p1.make_move(s)
