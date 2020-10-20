@@ -254,16 +254,16 @@ def utility(state, agent_color):
                 bcount += 1
     if terminal_test(state):
         if agent_color==WHITE and wcount>bcount:
-            util= 10*(wcount-bcount)
+            util= 100*(wcount-bcount)
         elif agent_color==WHITE and wcount<bcount:
-            util= -10*(bcount-wcount)
+            util= -100*(bcount-wcount)
         elif agent_color==WHITE and wcount==bcount:
             util= 0
         elif agent_color==BLACK:
             if bcount>wcount:
-                util= 10*(bcount-wcount)
+                util= 100*(bcount-wcount)
             elif bcount<wcount:
-                util= -10*(wcount-bcount)
+                util= -100*(wcount-bcount)
             else:
                 util= 0
     else:
